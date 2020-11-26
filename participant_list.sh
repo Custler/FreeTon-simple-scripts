@@ -128,6 +128,7 @@ Your_Stake=`echo "${LC_OUTPUT}" | grep "$dec_val_adnl" | awk '{print $1 / 100000
 Your_ADNL=`echo "${LC_OUTPUT}" | grep "$dec_val_adnl" | awk '{print $4}'`
 echo "---INFO: Your stake: $Your_Stake with ADNL: $(echo "$Curr_ADNL_Key" | tr "[:upper:]" "[:lower:]")"
 echo "You will start validate from $(GET_CHAIN_DATE "$election_id")"
+"${SCRIPT_DIR}/Send_msg_toTelBot.sh" "$HOSTNAME Server:" "We are successfully participate in elections $election_id with stake $Your_Stake and ADNL:  $(echo "$Curr_ADNL_Key" | tr "[:upper:]" "[:lower:]")" 2>&1 > /dev/null
 echo "-----------------------------------------------------------------------------------------------------"
 exit 0
 
