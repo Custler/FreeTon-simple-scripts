@@ -337,24 +337,6 @@ ValRewardFraction=$(echo "$Current_Depool_Info"|jq '.validatorRewardFraction'|tr
 PoolValStakeFee=$(echo "$Current_Depool_Info"|jq '.stakeFee'|tr -d '"')
 PoolRetOrReinvFee=$(echo "$Current_Depool_Info"|jq '.retOrReinvFee'|tr -d '"')
 
-echo "Depool contract address:     $Depool_addr  Balance: $(echo "scale=2; $((Depool_Bal)) / 1000000000" | $CALL_BC)"
-echo "Depool Owner/validator addr: $dp_val_wal  Balance: $(echo "scale=2; $((Val_Bal)) / 1000000000" | $CALL_BC)"
-echo "Depool proxy #0:            $dp_proxy0  Balance: $(echo "scale=2; $((prx0_Bal)) / 1000000000" | $CALL_BC)"
-echo "Depool proxy #1:            $dp_proxy1  Balance: $(echo "scale=2; $((prx1_Bal)) / 1000000000" | $CALL_BC)"
-[[ ! -z $Tik_addr ]] && \
-echo "Tik account:                 $Tik_addr  Balance: $(echo "scale=2; $((Tik_Bal)) / 1000000000" | $CALL_BC)"
-echo
-echo "================ Finance information for the depool ==========================="
-
-echo "                Pool Min Stake (Tk): $(echo "scale=3; $((PoolMinStake)) / 1000000000" | $CALL_BC)"
-echo "            Validator Comission (%): $((ValRewardFraction))"
-echo "              Depool stake fee (TK): $(echo "scale=3; $((PoolValStakeFee)) / 1000000000" | $CALL_BC)"
-echo " Depool return or reinvest fee (TK): $(echo "scale=3; $((PoolRetOrReinvFee)) / 1000000000" | $CALL_BC)"
-echo " Depool min balance to operate (TK): $(echo "scale=3; $((PoolSelfMinBalance)) / 1000000000" | $CALL_BC)"
-echo "           Validator Assurance (TK): $((validatorAssurance / 1000000000))"
-echo
-##################################################################################################################
-echo "============================ Depool rounds info ==============================="
 
 Round_0_ID=$(echo "$Curr_Rounds_Info" | jq "[.rounds[]]|.[0].id"|tr -d '"'| xargs printf "%d\n")
 Round_1_ID=$(echo "$Curr_Rounds_Info" | jq "[.rounds[]]|.[1].id"|tr -d '"'| xargs printf "%d\n")
@@ -387,10 +369,30 @@ Curr_Round_Reward=$(printf '%12.3f' "$(echo $Curr_Round_Reward / 1000000000 | jq
 Next_DP_Elec_ID=$(echo   "$Curr_Rounds_Info" | jq "[.rounds[]]|.[$Next_Round_Num].supposedElectedAt"|tr -d '"'| xargs printf "%d\n")
 Next_DP_Round_ID=$(echo  "$Curr_Rounds_Info" | jq "[.rounds[]]|.[$Next_Round_Num].id"|tr -d '"'| xargs printf "%d\n")
 Next_Round_P_QTY=$(echo  "$Curr_Rounds_Info" | jq "[.rounds[]]|.[$Next_Round_Num].participantQty"|tr -d '"'| xargs printf "%4d\n")
-Next_Round_Stake=$(echo  "$Curr_Rounds_Info" | jq "[.rounds[]]|.[$Next_Round_Num].stake"|tr -d '"'| xargs printf "%d\n")
+Next_Round_StakeNT=$(echo  "$Curr_Rounds_Info" | jq "[.rounds[]]|.[$Next_Round_Num].stake"|tr -d '"'| xargs printf "%d\n")
 Next_Round_Reward=$(echo "$Curr_Rounds_Info" | jq "[.rounds[]]|.[$Next_Round_Num].rewards"|tr -d '"'| xargs printf "%d\n")
-Next_Round_Stake=$(printf '%12.3f' "$(echo $Next_Round_Stake / 1000000000 | jq -nf /dev/stdin)")
+Next_Round_Stake=$(printf '%12.3f' "$(echo $Next_Round_StakeNT / 1000000000 | jq -nf /dev/stdin)")
 Next_Round_Reward=$(printf '%12.3f' "$(echo $Next_Round_Reward / 1000000000 | jq -nf /dev/stdin)")
+
+echo "Depool contract address:     $Depool_addr  Balance: $(echo "scale=2; $((Depool_Bal - Next_Round_StakeNT)) / 1000000000" | $CALL_BC)"
+echo "Depool Owner/validator addr: $dp_val_wal  Balance: $(echo "scale=2; $((Val_Bal)) / 1000000000" | $CALL_BC)"
+echo "Depool proxy #0:            $dp_proxy0  Balance: $(echo "scale=2; $((prx0_Bal)) / 1000000000" | $CALL_BC)"
+echo "Depool proxy #1:            $dp_proxy1  Balance: $(echo "scale=2; $((prx1_Bal)) / 1000000000" | $CALL_BC)"
+[[ ! -z $Tik_addr ]] && \
+echo "Tik account:                 $Tik_addr  Balance: $(echo "scale=2; $((Tik_Bal)) / 1000000000" | $CALL_BC)"
+echo
+echo "================ Finance information for the depool ==========================="
+
+echo "                Pool Min Stake (Tk): $(echo "scale=3; $((PoolMinStake)) / 1000000000" | $CALL_BC)"
+echo "            Validator Comission (%): $((ValRewardFraction))"
+echo "              Depool stake fee (TK): $(echo "scale=3; $((PoolValStakeFee)) / 1000000000" | $CALL_BC)"
+echo " Depool return or reinvest fee (TK): $(echo "scale=3; $((PoolRetOrReinvFee)) / 1000000000" | $CALL_BC)"
+echo " Depool min balance to operate (TK): $(echo "scale=3; $((PoolSelfMinBalance)) / 1000000000" | $CALL_BC)"
+echo "           Validator Assurance (TK): $((validatorAssurance / 1000000000))"
+echo
+##################################################################################################################
+echo "============================ Depool rounds info ==============================="
+
 
 echo " --------------------------------------------------------------------------------------------------------------------------"
 echo "|                 |              Prev Round          |           Current Round          |              Next Round          |"
