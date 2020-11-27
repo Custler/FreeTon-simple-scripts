@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# (C) Sergey Tyurin  2020-11-27 09:00:00
+# (C) Sergey Tyurin  2020-11-27 16:00:00
 
 # You have to have installed :
 #   'xxd' - is a part of vim-commons ( [apt/dnf/pkg] install vim[-common] )
@@ -130,39 +130,7 @@ function Get_SC_current_state() {
     fi
     echo "$LC_OUTPUT"
 }
-#=================================================
-# Get middle number
-function getmid() {
-  if (( $1 <= $2 )); then
-     (( $1 >= $3 )) && { echo $1; return; }
-     (( $2 <= $3 )) && { echo $2; return; }
-  fi;
-  if (( $1 >= $2 )); then
-     (( $1 <= $3 )) && { echo $1; return; }
-     (( $2 >= $3 )) && { echo $2; return; }
-  fi;
-  echo $3;
-}
-# Get first number
-function getfst() {
-  if (( $1 <= $2 )); then
-     (( $1 <= $3 )) && { echo $1; return; }
-  fi;
-  if (( $2 <= $1 )); then
-     (( $2 <= $3 )) && { echo $2; return; }
-  fi;
-  echo $3;
-}
-# Get last number
-function getnxt() {
-  if (( $1 >= $2 )); then
-     (( $1 >= $3 )) && { echo $1; return; }
-  fi;
-  if (( $2 >= $1 )); then
-     (( $2 >= $3 )) && { echo $2; return; }
-  fi;
-  echo $3;
-}
+
 #=================================================
 # Get account balance
 function get_acc_bal() {
@@ -341,10 +309,14 @@ PoolRetOrReinvFee=$(echo "$Current_Depool_Info"|jq '.retOrReinvFee'|tr -d '"')
 Round_0_ID=$(echo "$Curr_Rounds_Info" | jq "[.rounds[]]|.[0].id"|tr -d '"'| xargs printf "%d\n")
 Round_1_ID=$(echo "$Curr_Rounds_Info" | jq "[.rounds[]]|.[1].id"|tr -d '"'| xargs printf "%d\n")
 Round_2_ID=$(echo "$Curr_Rounds_Info" | jq "[.rounds[]]|.[2].id"|tr -d '"'| xargs printf "%d\n")
+Round_3_ID=$(echo "$Curr_Rounds_Info" | jq "[.rounds[]]|.[3].id"|tr -d '"'| xargs printf "%d\n")
 
-Prev_Round_ID=$(getfst "$Round_2_ID" "$Round_1_ID" "$Round_0_ID")
-Curr_Round_ID=$(getmid "$Round_2_ID" "$Round_1_ID" "$Round_0_ID")
-Next_Round_ID=$(getnxt "$Round_2_ID" "$Round_1_ID" "$Round_0_ID")
+declare -a rounds=($(($Round_0_ID)) $(($Round_1_ID)) $(($Round_2_ID)) $(($Round_3_ID)))
+IFS=$'\n' Rounds_Sorted=($(sort <<<"${rounds[*]}")); unset IFS
+
+Prev_Round_ID=${Rounds_Sorted[0]}
+Curr_Round_ID=${Rounds_Sorted[1]}
+Next_Round_ID=${Rounds_Sorted[2]}
 
 Prev_Round_Num=$((Prev_Round_ID - Round_0_ID))
 Curr_Round_Num=$((Curr_Round_ID - Round_0_ID))
