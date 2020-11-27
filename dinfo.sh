@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# (C) Sergey Tyurin  2020-11-25 09:00:00
+# (C) Sergey Tyurin  2020-11-27 09:00:00
 
 # You have to have installed :
 #   'xxd' - is a part of vim-commons ( [apt/dnf/pkg] install vim[-common] )
@@ -441,17 +441,23 @@ do
     Next_Ord_Stake=$($CALL_TL test -a ${DSCs_DIR}/DePool.abi.json -m getParticipantInfo -p "{\"addr\":$Curr_Part_Addr}" --decode-c6 $dpc_addr|grep -i 'withdrawValue' | jq ".stakes.\"$Hex_Next_Round_ID\""|tr -d '"')
     Reward=$($CALL_TL test -a ${DSCs_DIR}/DePool.abi.json -m getParticipantInfo -p "{\"addr\":$Curr_Part_Addr}" --decode-c6 $dpc_addr|grep -i 'withdrawValue' | jq ".reward"|tr -d '"')
     Curr_Lck_Stake=$($CALL_TL test -a ${DSCs_DIR}/DePool.abi.json -m getParticipantInfo -p "{\"addr\":$Curr_Part_Addr}" --decode-c6 $dpc_addr|grep -i 'withdrawValue' | jq ".locks.\"$Hex_Curr_Round_ID\".amount" |tr -d '"')
+    
+    Wtdr_Val_hex=$($CALL_TL test -a ${DSCs_DIR}/DePool.abi.json -m getParticipantInfo -p "{\"addr\":$Curr_Part_Addr}" --decode-c6 $dpc_addr|grep -i 'withdrawValue' | jq ".withdrawValue"|tr -d '"')
+    Wtdr_Val_Info=""
+    if [[ $Wtdr_Val_hex -ne 0 ]];then
+        Wtdr_Val_Info="; Next round withdraw: $(echo "scale=3; $((Wtdr_Val_hex)) / 1000000000" | $CALL_BC)"
+    fi
+
     Lck_Start_Time=$($CALL_TL test -a ${DSCs_DIR}/DePool.abi.json -m getParticipantInfo -p "{\"addr\":$Curr_Part_Addr}" --decode-c6 $dpc_addr|grep -i 'withdrawValue' | jq ".locks.\"$Hex_Curr_Round_ID\".lastWithdrawalTime" |tr -d '"')
     Lck_Held_For=$($CALL_TL test -a ${DSCs_DIR}/DePool.abi.json -m getParticipantInfo -p "{\"addr\":$Curr_Part_Addr}" --decode-c6 $dpc_addr|grep -i 'withdrawValue' | jq ".locks.\"$Hex_Curr_Round_ID\".withdrawalPeriod" |tr -d '"')
     Lck_Out_DateTime="$(echo $((Lck_Start_Time + Lck_Held_For)) | gawk '{print strftime("%Y-%m-%d %H:%M:%S", $1)}')"
     LockInfo=""
     if [[ $Curr_Lck_Stake -ne 0 ]];then
-        LockInfo="Lock: $((Curr_Lck_Stake / 1000000000)) will out: $Lck_Out_DateTime"
+        LockInfo="; Lock: $((Curr_Lck_Stake / 1000000000)) will out: $Lck_Out_DateTime"
     fi
 
     echo "$(printf '%4d' $(($i + 1))) $Curr_Part_Addr Reward: $((Reward / 1000000000)) ;  \
-Stakes: $((Prev_Ord_Stake / 1000000000)) / $((Curr_Ord_Stake / 1000000000)) / $((Next_Ord_Stake / 1000000000)) ; \
-$LockInfo"
+Stakes: $((Prev_Ord_Stake / 1000000000)) / $((Curr_Ord_Stake / 1000000000)) / $((Next_Ord_Stake / 1000000000)) $LockInfo $Wtdr_Val_Info"
 
 done
 
@@ -467,17 +473,23 @@ do
     Next_Ord_Stake=$($CALL_TL test -a ${DSCs_DIR}/DePool.abi.json -m getParticipantInfo -p "{\"addr\":$Curr_Part_Addr}" --decode-c6 $dpc_addr|grep -i 'withdrawValue' | jq ".stakes.\"$Hex_Next_Round_ID\""|tr -d '"')
     Reward=$($CALL_TL test -a ${DSCs_DIR}/DePool.abi.json -m getParticipantInfo -p "{\"addr\":$Curr_Part_Addr}" --decode-c6 $dpc_addr|grep -i 'withdrawValue' | jq ".reward"|tr -d '"')
     Curr_Lck_Stake=$($CALL_TL test -a ${DSCs_DIR}/DePool.abi.json -m getParticipantInfo -p "{\"addr\":$Curr_Part_Addr}" --decode-c6 $dpc_addr|grep -i 'withdrawValue' | jq ".locks.\"$Hex_Curr_Round_ID\".amount" |tr -d '"')
+    
+    Wtdr_Val_hex=$($CALL_TL test -a ${DSCs_DIR}/DePool.abi.json -m getParticipantInfo -p "{\"addr\":$Curr_Part_Addr}" --decode-c6 $dpc_addr|grep -i 'withdrawValue' | jq ".withdrawValue"|tr -d '"')
+    Wtdr_Val_Info=""
+    if [[ $Wtdr_Val_hex -ne 0 ]];then
+        Wtdr_Val_Info="; Next round withdraw: $(echo "scale=3; $((Wtdr_Val_hex)) / 1000000000" | $CALL_BC)"
+    fi
+
     Lck_Start_Time=$($CALL_TL test -a ${DSCs_DIR}/DePool.abi.json -m getParticipantInfo -p "{\"addr\":$Curr_Part_Addr}" --decode-c6 $dpc_addr|grep -i 'withdrawValue' | jq ".locks.\"$Hex_Curr_Round_ID\".lastWithdrawalTime" |tr -d '"')
     Lck_Held_For=$($CALL_TL test -a ${DSCs_DIR}/DePool.abi.json -m getParticipantInfo -p "{\"addr\":$Curr_Part_Addr}" --decode-c6 $dpc_addr|grep -i 'withdrawValue' | jq ".locks.\"$Hex_Curr_Round_ID\".withdrawalPeriod" |tr -d '"')
     Lck_Out_DateTime="$(echo $((Lck_Start_Time + Lck_Held_For)) | gawk '{print strftime("%Y-%m-%d %H:%M:%S", $1)}')"
     LockInfo=""
     if [[ $Curr_Lck_Stake -ne 0 ]];then
-        LockInfo="Lock: $((Curr_Lck_Stake / 1000000000)) will out: $Lck_Out_DateTime"
+        LockInfo="; Lock: $((Curr_Lck_Stake / 1000000000)) will out: $Lck_Out_DateTime"
     fi
 
     echo "$(printf '%4d' $(($i + 1))) $Curr_Part_Addr Reward: $((Reward / 1000000000)) ;  \
-Stakes: $((Prev_Ord_Stake / 1000000000)) / $((Curr_Ord_Stake / 1000000000)) / $((Next_Ord_Stake / 1000000000)) ; \
-$LockInfo"
+Stakes: $((Prev_Ord_Stake / 1000000000)) / $((Curr_Ord_Stake / 1000000000)) / $((Next_Ord_Stake / 1000000000)) $LockInfo $Wtdr_Val_Info"
 
 done
 

@@ -62,7 +62,7 @@ echo
 echo "Time Now: $(date  +'%Y-%m-%d %H:%M:%S')"
 echo
 echo "Tik_addr: $Tik_addr"
-echo "Has Status: $Tik_Status,  balance : $(echo "scale=3; $((Tik_AMOUNT)) / 1000000000" | $CALL_BC) tokens | Last op: $Helper_LAST_TR_TIME"
+echo "Has Status: $Tik_Status,  balance : $(echo "scale=3; $((Tik_AMOUNT)) / 1000000000" | $CALL_BC) tokens | Last op: $Tik_LAST_TR_TIME"
 echo
 echo "Depool: $Depool_addr"
 echo "Has Status: $Depool_Status,  balance : $(echo "scale=3; $((Depool_AMOUNT)) / 1000000000" | $CALL_BC) tokens | Last op: $Depool_LAST_TR_TIME"
