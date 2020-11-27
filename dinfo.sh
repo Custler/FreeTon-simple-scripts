@@ -312,7 +312,7 @@ Round_2_ID=$(echo "$Curr_Rounds_Info" | jq "[.rounds[]]|.[2].id"|tr -d '"'| xarg
 Round_3_ID=$(echo "$Curr_Rounds_Info" | jq "[.rounds[]]|.[3].id"|tr -d '"'| xargs printf "%d\n")
 
 declare -a rounds=($(($Round_0_ID)) $(($Round_1_ID)) $(($Round_2_ID)) $(($Round_3_ID)))
-IFS=$'\n' Rounds_Sorted=($(sort <<<"${rounds[*]}")); unset IFS
+IFS=$'\n' Rounds_Sorted=($(sort -g <<<"${rounds[*]}")); unset IFS
 
 Prev_Round_ID=${Rounds_Sorted[0]}
 Curr_Round_ID=${Rounds_Sorted[1]}
