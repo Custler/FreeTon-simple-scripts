@@ -115,39 +115,7 @@ function Get_SC_current_state() {
     fi
     echo "$LC_OUTPUT"
 }
-#=================================================
-# Get middle number
-function getmid() {
-  if (( $1 <= $2 )); then
-     (( $1 >= $3 )) && { echo $1; return; }
-     (( $2 <= $3 )) && { echo $2; return; }
-  fi;
-  if (( $1 >= $2 )); then
-     (( $1 <= $3 )) && { echo $1; return; }
-     (( $2 >= $3 )) && { echo $2; return; }
-  fi;
-  echo $3;
-}
-# Get first number
-function getfst() {
-  if (( $1 <= $2 )); then
-     (( $1 <= $3 )) && { echo $1; return; }
-  fi;
-  if (( $2 <= $1 )); then
-     (( $2 <= $3 )) && { echo $2; return; }
-  fi;
-  echo $3;
-}
-# Get last number
-function getnxt() {
-  if (( $1 >= $2 )); then
-     (( $1 >= $3 )) && { echo $1; return; }
-  fi;
-  if (( $2 >= $1 )); then
-     (( $2 >= $3 )) && { echo $2; return; }
-  fi;
-  echo $3;
-}
+
 #=================================================
 # Load addresses and set variables
 Depool_addr=`cat ${KEYS_DIR}/depool.addr`
@@ -257,12 +225,17 @@ echo "$dp_proxy1" > ${KEYS_DIR}/proxy1.addr
 
 ##############################################################################
 # get info from DePool contract state
+Curr_Rounds_Info=$($CALL_TL test -a ${DSCs_DIR}/DePool.abi.json -m getRounds -p "{}" --decode-c6 $dpc_addr | grep -i 'rounds')
 
-Round_0_ID=$($HOME/bin/tvm_linker test -a ${DSCs_DIR}/DePool.abi.json -m getRounds -p "{}" --decode-c6 $dpc_addr|grep rounds|jq "[.rounds[]]|.[0].id"|tr -d '"'| xargs printf "%d\n")
-Round_1_ID=$($HOME/bin/tvm_linker test -a ${DSCs_DIR}/DePool.abi.json -m getRounds -p "{}" --decode-c6 $dpc_addr|grep rounds|jq "[.rounds[]]|.[1].id"|tr -d '"'| xargs printf "%d\n")
-Round_2_ID=$($HOME/bin/tvm_linker test -a ${DSCs_DIR}/DePool.abi.json -m getRounds -p "{}" --decode-c6 $dpc_addr|grep rounds|jq "[.rounds[]]|.[2].id"|tr -d '"'| xargs printf "%d\n")
+Round_0_ID=$(echo "$Curr_Rounds_Info" | jq "[.rounds[]]|.[0].id"|tr -d '"'| xargs printf "%d\n")
+Round_1_ID=$(echo "$Curr_Rounds_Info" | jq "[.rounds[]]|.[1].id"|tr -d '"'| xargs printf "%d\n")
+Round_2_ID=$(echo "$Curr_Rounds_Info" | jq "[.rounds[]]|.[2].id"|tr -d '"'| xargs printf "%d\n")
+Round_3_ID=$(echo "$Curr_Rounds_Info" | jq "[.rounds[]]|.[3].id"|tr -d '"'| xargs printf "%d\n")
 
-Mid_Round_ID=$(getmid "$Round_2_ID" "$Round_1_ID" "$Round_0_ID")
+declare -a rounds=($(($Round_0_ID)) $(($Round_1_ID)) $(($Round_2_ID)) $(($Round_3_ID)))
+IFS=$'\n' Rounds_Sorted=($(sort <<<"${rounds[*]}")); unset IFS
+
+Mid_Round_ID=${Rounds_Sorted[1]}
 Curr_Round_Num=$((Mid_Round_ID - Round_0_ID))
 
 Curr_DP_Elec_ID=$($HOME/bin/tvm_linker test -a ${DSCs_DIR}/DePool.abi.json -m getRounds -p "{}" --decode-c6 $dpc_addr|grep rounds|jq "[.rounds[]]|.[$Curr_Round_Num].supposedElectedAt"|tr -d '"'| xargs printf "%d\n")
