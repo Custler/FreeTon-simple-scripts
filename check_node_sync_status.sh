@@ -26,11 +26,7 @@ GET_CHAIN_DATE() {
 while(true)
 do
 
-VEC_OUTPUT=$("${TON_BUILD_DIR}/validator-engine-console/validator-engine-console" \
-    -a 127.0.0.1:3030 \
-    -k "${KEYS_DIR}/client" \
-    -p "${KEYS_DIR}/server.pub" \
-    -c "getstats" -c "quit")
+VEC_OUTPUT=$($CALL_VC -c "getstats" -c "quit")
 
 # echo "VEC output:"
 CURR_TD_NOW=`echo "${VEC_OUTPUT}" | grep unixtime | awk '{print $2}'`

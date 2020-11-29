@@ -63,9 +63,11 @@ $TON_LOG_DIR/node.log {
 _ENDNLR_
 )
 if [[ "$OS_SYSTEM" == "Linux" ]];then
-    sudo echo $NODE_LOG_ROT > /etc/logrotate.d/tonnode
+    sudo echo "$NODE_LOG_ROT" > tonnode
+    sudo mv -f tonnode /etc/logrotate.d/
 else
-    sudo echo $NODE_LOG_ROT > /usr/local/etc/logrotate.d/tonnode
+    sudo echo "$NODE_LOG_ROT" > tonnode
+    sudo mv -f tonnode /usr/local/etc/logrotate.d/
 fi
 
 #============================================

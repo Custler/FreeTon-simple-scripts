@@ -60,8 +60,6 @@ if [[ ! -d $KEYS_DIR ]];then
   exit 1
 fi
 
-CALL_LC="${TON_BUILD_DIR}/lite-client/lite-client -p ${KEYS_DIR}/liteserver.pub -a 127.0.0.1:3031 -t 5"
-
 #######################################################################################################
 #===================================================
 # Get current electoin cycle info

@@ -26,13 +26,12 @@ GET_CHAIN_DATE() {
 }
 # ===================================================
 
-CALL_VC="${TON_BUILD_DIR}/validator-engine-console/validator-engine-console -k ${KEYS_DIR}/client -p ${KEYS_DIR}/server.pub -a 127.0.0.1:3030 -t 5"
 
 while(true)
 do
 
 VEC_OUTPUT=$($CALL_VC -c "getstats" -c "quit")
-
+    
 # echo "VEC output:"
 CURR_TD_NOW=`echo "${VEC_OUTPUT}" | grep unixtime | awk '{print $2}'`
 CHAIN_TD=`echo "${VEC_OUTPUT}" | grep masterchainblocktime | awk '{print $2}'`
@@ -47,7 +46,7 @@ fi
 
 CHAIN_TD=`GET_CHAIN_DATE "$CHAIN_TD"`
 
-echo "CurrTime: $CURR_TD_NOW TimeDiff: $TIME_DIFF" | tee -a ~/logs/time-diff.log
+echo "CurrTime: $CURR_TD_NOW TimeDiff: $TIME_DIFF" | tee -a $HOME/logs/time-diff.log
 
 if [[ $TIME_DIFF -gt $ALARM_TIME_DIFF ]];then
     "${SCRIPT_DIR}/Send_msg_toTelBot.sh" "$HOSTNAME Server" "ALARM! NODE out of sync. TimeDiff: $TIME_DIFF" 2>&1 > /dev/null
