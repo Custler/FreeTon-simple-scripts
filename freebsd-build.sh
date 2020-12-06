@@ -38,6 +38,7 @@ if [ "${INSTALL_DEPENDENCIES}" = "yes" ]; then
     echo "INFO: install dependencies..."
     sudo pkg update -f && sudo pkg install -y \
 	git \
+    sysinfo \
 	wget \
 	gawk \
 	base64 \

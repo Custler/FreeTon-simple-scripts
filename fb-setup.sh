@@ -74,7 +74,8 @@ $TON_LOG_DIR/node.log {
 }
 _ENDNLR_
 )
-sudo echo $NODE_LOG_ROT > /usr/local/etc/logrotate.d/tonnode
+sudo echo $NODE_LOG_ROT > tonnode
+sudo mv -f tonnode /usr/local/etc/logrotate.d/
 
 #============================================
 # set global config according to NETWORK_TYPE

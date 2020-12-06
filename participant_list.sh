@@ -70,6 +70,7 @@ elector_addr=`cat ${ELECTIONS_WORK_DIR}/elector-addr-base64`
 ADNL_KEY="$1"
 Curr_ADNL_Key=`cat ${ELECTIONS_WORK_DIR}/${VALIDATOR_NAME}-election-adnl-key | grep "created new key" | awk '{print $4}'`
 ADNL_KEY=${ADNL_KEY:=$Curr_ADNL_Key}
+Curr_PUB_Key=`cat ${ELECTIONS_WORK_DIR}/${VALIDATOR_NAME}-lt-request-dump2 | grep 'validator public key' | awk '{print $11}' | tr "[:upper:]" "[:lower:]"`
 
 trap 'echo LC TIMEOUT EXIT' EXIT
 election_id=`$CALL_LC -rc "runmethod $elector_addr active_election_id" -rc "quit" 2>/dev/null | grep "result:" | awk '{print $3}' `
@@ -123,12 +124,12 @@ if [[ -z $ADDR_FOUND ]];then
     echo "###-ERROR: Can't find you in participant list. account: ${MSIG_ADDR} / $dec_val_acc_addr"
     exit 1
 fi
-
+TON_LIVE_URL="https://ton.live/validators?section=details&public_key=${Curr_PUB_Key}&key_block_num=undefined"
 Your_Stake=`echo "${LC_OUTPUT}" | grep "$dec_val_adnl" | awk '{print $1 / 1000000000}'`
 Your_ADNL=`echo "${LC_OUTPUT}" | grep "$dec_val_adnl" | awk '{print $4}'`
 echo "---INFO: Your stake: $Your_Stake with ADNL: $(echo "$Curr_ADNL_Key" | tr "[:upper:]" "[:lower:]")"
 echo "You will start validate from $(GET_CHAIN_DATE "$election_id")"
-"${SCRIPT_DIR}/Send_msg_toTelBot.sh" "$HOSTNAME Server:" "We are successfully participate in elections $election_id with stake $Your_Stake and ADNL:  $(echo "$Curr_ADNL_Key" | tr "[:upper:]" "[:lower:]")" 2>&1 > /dev/null
+"${SCRIPT_DIR}/Send_msg_toTelBot.sh" "$HOSTNAME Server:" "We are successfully participate in elections $election_id with stake $Your_Stake and ADNL:  $(echo "$Curr_ADNL_Key" | tr "[:upper:]" "[:lower:]") ${TON_LIVE_URL}" 2>&1 > /dev/null
 echo "-----------------------------------------------------------------------------------------------------"
 exit 0
 

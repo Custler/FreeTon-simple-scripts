@@ -25,7 +25,7 @@
 SCRPT_USER=$USER
 
 DELAY_TIME=0        # Delay time from the start of elections
-TIME_SHIFT=120      # Time between sequential scripts
+TIME_SHIFT=300      # Time between sequential scripts
 
 echo
 echo "################################# Set timetable for DePool ###################################"

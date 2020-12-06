@@ -41,7 +41,9 @@ sudo chown "${SETUP_USER}:${SETUP_GROUP}" "${TON_WORK_DIR}"
 mkdir -p "${TON_WORK_DIR}/etc"
 mkdir -p "${TON_WORK_DIR}/db"
 
-mkdir -p $TON_LOG_DIR
+mkdir -p "${KEYS_DIR}"
+mkdir -p "$ELECTIONS_WORK_DIR"
+mkdir -p "${TON_LOG_DIR}"
 
 #============================================
 # set log rotate
@@ -79,17 +81,11 @@ cp -f "${CONFIGS_DIR}/${NETWORK_TYPE}/ton-global.config.json" "${TON_WORK_DIR}/e
 echo "INFO: generate initial ${TON_WORK_DIR}/db/config.json..."
 "${TON_BUILD_DIR}/validator-engine/validator-engine" -C "${TON_WORK_DIR}/etc/ton-global.config.json" --db "${TON_WORK_DIR}/db" --ip "${MY_ADDR}"
 
-sudo mkdir -p "${KEYS_DIR}"
-sudo chown "${SETUP_USER}:${SETUP_GROUP}" "${KEYS_DIR}"
-chmod 700 "${KEYS_DIR}"
-
 cd "${KEYS_DIR}"
 
 "${UTILS_DIR}/generate-random-id" -m keys -n server > "${KEYS_DIR}/keys_s"
 "${UTILS_DIR}/generate-random-id" -m keys -n liteserver > "${KEYS_DIR}/keys_l"
 "${UTILS_DIR}/generate-random-id" -m keys -n client > "${KEYS_DIR}/keys_c"
-chmod 600 "${KEYS_DIR}"/*
-[[ -d ${ELECTIONS_WORK_DIR} ]] && chmod 700 "${ELECTIONS_WORK_DIR}"
 
 find "${KEYS_DIR}"
 

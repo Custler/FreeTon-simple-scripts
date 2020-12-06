@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# (C) Sergey Tyurin  2020-11-27 20:00:00
+# (C) Sergey Tyurin  2020-12-05 20:00:00
 
 # You have to have installed :
 #   'xxd' - is a part of vim-commons ( [apt/dnf/pkg] install vim[-common] )
@@ -58,8 +58,21 @@ else
     CALL_BC="bc -l"
 fi
 
+NormText="\e[0m"
+RedBlink="\e[5;101m"
+GreeBack="\e[42m"
+BlueBack="\e[44m"
+RedBack="\e[41m"
+YellowBack="\e[43m"
+BoldText="\e[1m"
+
 ##############################################################################
 # Test binaries
+if [[ -z $($CALL_LC --help |grep 'Lite Client') ]];then
+    echo "###-ERROR(line $LINENO): Lite Client not installed in PATH"
+    exit 1
+fi
+
 if [[ -z $($CALL_TL -V | grep "TVM linker") ]];then
     echo "###-ERROR(line $LINENO): TVM linker not installed in PATH"
     exit 1
@@ -76,9 +89,9 @@ if [[ -z $(jq --help 2>/dev/null |grep -i "Usage"|cut -d ":" -f 1) ]];then
 fi
 #=================================================
 # Check 'getvalidators' command present in engine
-Node_Keys=`$CALL_VC -c "getvalidators" -c "quit" 2>/dev/null | grep "validator0"`
+Node_Keys=`$CALL_VC -c "getvalidators" -c "quit" 2>/dev/null | grep "unknown command"`
 
-if [[ -z $Node_Keys ]];then
+if [[ ! -z $Node_Keys ]];then
     echo "###-ERROR(line $LINENO): You engine hasn't command 'getvalidators'. Get & install new engine from 'https://github.com/FreeTON-Network/FreeTON-Node'"
 #    exit 1
 fi
@@ -125,7 +138,8 @@ function Get_SC_current_state() {
     trap - EXIT
     local result=`echo $LC_OUTPUT | grep "written StateInit of account"`
     if [[ -z  $result ]];then
-        echo "###-ERROR(line $LINENO): Cannot get account state. Can't continue. Sorry."
+        echo "###-ERROR(line $LINENO): Cannot get state of account: $Depool_addr" 
+        echo "    Can't continue. Sorry."
         exit 1
     fi
     echo "$LC_OUTPUT"
@@ -142,6 +156,20 @@ function get_acc_bal() {
 
 ##############################################################################
 # Load addresses and set variables
+# net id - first 16 syms of zerostate id
+CURR_NET_ID=`$CALL_LC -rc "time" -rc "quit" 2>&1 |grep 'zerostate id'|awk -F '': '{print $3}'|cut -c 1-16`
+if [[ "$CURR_NET_ID" == "$MAIN_NET_ID" ]];then
+    CurrNetInfo="${BoldText}${BlueBack}You are in MAIN network${NormText}"
+elif [[ "$CURR_NET_ID" == "$DEV_NET_ID" ]];then
+    CurrNetInfo="${BoldText}${RedBack}You are in DEVNET network${NormText}"
+elif [[ "$CURR_NET_ID" == "$FLD_NET_ID" ]];then
+    CurrNetInfo="${BoldText}${YellowBack}You are in FLD network${NormText}"
+else
+    CurrNetInfo="${BoldText}${RedBlink}You are in UNKNOWN network${NormText} or you need to update 'env.sh'"
+fi
+echo -e "$CurrNetInfo"
+echo
+
 Inp_Depool_addr=$1
 Depool_addr=`cat ${KEYS_DIR}/depool.addr`
 Depool_addr=${Inp_Depool_addr:=$Depool_addr}
@@ -235,7 +263,8 @@ fi
 LC_OUTPUT="$(Get_SC_current_state "$Depool_addr")"
 result=`echo $LC_OUTPUT | grep "written StateInit of account"`
 if [[ -z  $result ]];then
-    echo "###-ERROR(line $LINENO): Cannot get account state. Can't continue. Sorry."
+    echo "###-ERROR(line $LINENO): Cannot get state of account: $Depool_addr" 
+    echo "    Can't continue. Sorry."
     exit 1
 fi
 # echo "Done."
@@ -262,13 +291,10 @@ Current_Depool_Info=$($CALL_TL test -a ${DSCs_DIR}/DePool.abi.json -m getDePoolI
 
 echo 
 echo "==================== Current Depool State ====================================="
-NormText="\e[0m"
-RedBlink="\e[5;101m"
-GreeText="\e[42m"
 
 PoolClosed=$(echo  "$Current_Depool_Info"|jq '.poolClosed'|tr -d '"')
 if [[ "$PoolClosed" == "false" ]];then
-    PoolState="${GreeText}OPEN for participation!${NormText}"
+    PoolState="${GreeBack}OPEN for participation!${NormText}"
 fi
 if [[ "$PoolClosed" == "true" ]];then
     PoolState="${RedBlink}CLOSED!!! all stakes should be return to participants${NormText}"

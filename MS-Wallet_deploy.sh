@@ -82,11 +82,11 @@ WAL_NAMEi=$1
 WAL_NAME=${WAL_NAMEi:-"$HOSTNAME"}
 echo "Wallet Name: $WAL_NAME"
 WALL_ADDR=`cat "${KEY_FILES_DIR}/${WAL_NAME}.addr"`
-    if [[ -z $WALL_ADDR ]];then
-        echo
-        echo "###-ERROR(line $LINENO): Cannot find wallet address in file  ${KEY_FILES_DIR}/${WAL_NAME}.addr"
-        echo
-        exit 1
+if [[ -z $WALL_ADDR ]];then
+    echo
+    echo "###-ERROR(line $LINENO): Cannot find wallet address in file  ${KEY_FILES_DIR}/${WAL_NAME}.addr"
+    echo
+    exit 1
 fi
 echo "Wallet addr for deploy : $WALL_ADDR"
 Work_Chain=`echo "${WALL_ADDR}" | cut -d ':' -f 1`

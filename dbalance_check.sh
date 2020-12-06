@@ -16,6 +16,26 @@ else
     CALL_BC="bc -l"
 fi
 
+NormText="\e[0m"
+RedBlink="\e[5;101m"
+GreeBack="\e[42m"
+BlueBack="\e[44m"
+RedBack="\e[41m"
+YellowBack="\e[43m"
+BoldText="\e[1m"
+echo
+CURR_NET_ID=`$CALL_LC -rc "time" -rc "quit" 2>&1 |grep 'zerostate id'|awk -F '': '{print $3}'|cut -c 1-16`
+if [[ "$CURR_NET_ID" == "$MAIN_NET_ID" ]];then
+    CurrNetInfo="${BoldText}${BlueBack}You are in MAIN network${NormText}"
+elif [[ "$CURR_NET_ID" == "$DEV_NET_ID" ]];then
+    CurrNetInfo="${BoldText}${RedBack}You are in DEVNET network${NormText}"
+elif [[ "$CURR_NET_ID" == "$FLD_NET_ID" ]];then
+    CurrNetInfo="${BoldText}${YellowBack}You are in FLD network${NormText}"
+else
+    CurrNetInfo="${BoldText}${RedBlink}You are in UNKNOWN network${NormText} or you need to update 'env.sh'"
+fi
+echo -e "$CurrNetInfo"
+
 Tik_addr=`cat ${KEYS_DIR}/Tik.addr`
 Depool_addr=`cat ${KEYS_DIR}/depool.addr`
 # Helper_addr=`cat ${KEYS_DIR}/helper.addr`
