@@ -113,6 +113,8 @@ if [[ -z $Depool_addr ]];then
     echo
     exit 1
 fi
+dpc_addr=`echo $Depool_addr | cut -d ':' -f 2`
+
 
 Tik_addr=`cat ${KEYS_DIR}/Tik.addr`
 Tik_Keys_File="${KEYS_DIR}/Tik.keys.json"
