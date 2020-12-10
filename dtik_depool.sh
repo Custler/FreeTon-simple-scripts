@@ -222,7 +222,7 @@ if [[ Attempts_to_send -eq 0   ]];then
     exit 3
 fi
 
-if [[ ! -z $elections_id ]];then
+if [[ ! "$elections_id" == "0" ]];then
     #=================================================
     # Save DePool contract state to file
     echo -n "Get SC state of depool: $Depool_addr ... "    
@@ -251,7 +251,8 @@ if [[ ! -z $elections_id ]];then
 
     Curr_DP_Elec_ID=$($HOME/bin/tvm_linker test -a ${DSCs_DIR}/DePool.abi.json -m getRounds -p "{}" --decode-c6 $dpc_addr|grep rounds|jq "[.rounds[]]|.[$Curr_Round_Num].supposedElectedAt"|tr -d '"'| xargs printf "%d\n")
     echo "Elections ID in depool: $Curr_DP_Elec_ID"
-    if [[ ! "$election_id" == "$Curr_DP_Elec_ID" ]]; then
+    
+    if [[ ! "$elections_id" == "$Curr_DP_Elec_ID" ]]; then
         echo "###-ERROR(line $LINENO): Current elections ID from elector $elections_id ($(TD_unix2human "$elections_id")) is not equal elections ID from DP: $Curr_DP_Elec_ID ($(TD_unix2human "$Curr_DP_Elec_ID"))"
         echo "INFO: $(basename "$0") END $(date +%s) / $(date)"
         "${SCRIPT_DIR}/Send_msg_toTelBot.sh" "$HOSTNAME Server: Depool Tik:" \
