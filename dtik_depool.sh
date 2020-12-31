@@ -41,7 +41,7 @@ SCRIPT_DIR=`cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P`
 
 ###################
 TIMEDIFF_MAX=100
-SLEEP_TIMEOUT=10
+SLEEP_TIMEOUT=15
 SEND_ATTEMPTS=10
 ###################
 
@@ -114,7 +114,7 @@ if [[ -z $Depool_addr ]];then
     exit 1
 fi
 dpc_addr=`echo $Depool_addr | cut -d ':' -f 2`
-
+echo "Depool address: ${Depool_addr}"
 
 Tik_addr=`cat ${KEYS_DIR}/Tik.addr`
 Tik_Keys_File="${KEYS_DIR}/Tik.keys.json"
@@ -222,6 +222,8 @@ if [[ Attempts_to_send -eq 0   ]];then
     exit 3
 fi
 
+sleep $SLEEP_TIMEOUT
+
 if [[ ! "$elections_id" == "0" ]];then
     #=================================================
     # Save DePool contract state to file
@@ -248,7 +250,7 @@ if [[ ! "$elections_id" == "0" ]];then
 
     Mid_Round_ID=${Rounds_Sorted[1]}
     Curr_Round_Num=$((Mid_Round_ID - Round_0_ID))
-
+    
     Curr_DP_Elec_ID=$($HOME/bin/tvm_linker test -a ${DSCs_DIR}/DePool.abi.json -m getRounds -p "{}" --decode-c6 $dpc_addr|grep rounds|jq "[.rounds[]]|.[$Curr_Round_Num].supposedElectedAt"|tr -d '"'| xargs printf "%d\n")
     echo "Elections ID in depool: $Curr_DP_Elec_ID"
     

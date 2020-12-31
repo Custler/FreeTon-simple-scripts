@@ -170,9 +170,19 @@ fi
 echo -e "$CurrNetInfo"
 echo
 
-Inp_Depool_addr=$1
-Depool_addr=`cat ${KEYS_DIR}/depool.addr`
-Depool_addr=${Inp_Depool_addr:=$Depool_addr}
+Depool_addr=$1
+if [[ -z $Depool_addr ]];then
+    MyDepool_addr=`cat "${KEYS_DIR}/depool.addr"`
+    if [[ -z $MyDepool_addr ]];then
+        echo " Can't find ${KEYS_DIR}/depool.addr"
+        exit 1
+    else
+        Depool_addr=$MyDepool_addr
+    fi
+else
+    acc_fmt="$(echo "$Depool_addr" |  awk -F ':' '{print $2}')"
+    [[ -z $acc_fmt ]] && Depool_addr=`cat "${KEYS_DIR}/${Depool_addr}.addr"`
+fi
 
 dpc_addr=`echo $Depool_addr | cut -d ':' -f 2`
 [[ -f ${KEYS_DIR}/Tik.addr ]] && Tik_addr=`cat ${KEYS_DIR}/Tik.addr`
@@ -447,13 +457,24 @@ do
     Reward=$($CALL_TL test -a ${DSCs_DIR}/DePool.abi.json -m getParticipantInfo -p "{\"addr\":$Curr_Part_Addr}" --decode-c6 $dpc_addr|grep -i 'withdrawValue' | jq ".reward"|tr -d '"')
     RWRD_Info=$(printf "%'8.2f" "$(echo $((Reward)) / 1000000000 | jq -nf /dev/stdin)")
 
+    Reinvest=$($CALL_TL test -a ${DSCs_DIR}/DePool.abi.json -m getParticipantInfo -p "{\"addr\":$Curr_Part_Addr}" --decode-c6 $dpc_addr|grep -i 'withdrawValue' | jq ".reinvest"|tr -d '"')
+    REINV_Info=""
+    if [[ "${Reinvest}" == "false" ]];then
+        REINV_Info="${RedBack}GONE${NormText}"
+    elif [[ "${Reinvest}" == "true" ]];then
+        REINV_Info="Stay"
+    fi
+
     Wtdr_Val_hex=$($CALL_TL test -a ${DSCs_DIR}/DePool.abi.json -m getParticipantInfo -p "{\"addr\":$Curr_Part_Addr}" --decode-c6 $dpc_addr|grep -i 'withdrawValue' | jq ".withdrawValue"|tr -d '"')
     Wtdr_Val_Info=""
     if [[ $Wtdr_Val_hex -ne 0 ]];then
         Wtdr_Val_Info="; Next round withdraw: $(echo "scale=3; $((Wtdr_Val_hex)) / 1000000000" | $CALL_BC)"
     fi
 
-    Curr_Lck_Stake=$($CALL_TL test -a ${DSCs_DIR}/DePool.abi.json -m getParticipantInfo -p "{\"addr\":$Curr_Part_Addr}" --decode-c6 $dpc_addr|grep -i 'withdrawValue' | jq ".locks.\"$Hex_Curr_Round_ID\".amount" |tr -d '"')
+    Curr_Lck_Stake=$(($($CALL_TL test -a ${DSCs_DIR}/DePool.abi.json -m getParticipantInfo -p "{\"addr\":$Curr_Part_Addr}" --decode-c6 $dpc_addr|grep -i 'withdrawValue' | jq ".locks.\"$Hex_Curr_Round_ID\".amount" |tr -d '"')))
+    if [[ $Curr_Lck_Stake -eq 0 ]];then
+        Curr_Lck_Stake=$(($($CALL_TL test -a ${DSCs_DIR}/DePool.abi.json -m getParticipantInfo -p "{\"addr\":$Curr_Part_Addr}" --decode-c6 $dpc_addr|grep -i 'withdrawValue' | jq ".locks.\"$Hex_Curr_Round_ID\".remainingAmount" |tr -d '"')))
+    fi
     Lck_Start_Time=$($CALL_TL test -a ${DSCs_DIR}/DePool.abi.json -m getParticipantInfo -p "{\"addr\":$Curr_Part_Addr}" --decode-c6 $dpc_addr|grep -i 'withdrawValue' | jq ".locks.\"$Hex_Curr_Round_ID\".lastWithdrawalTime" |tr -d '"')
     Lck_Held_For=$($CALL_TL test -a ${DSCs_DIR}/DePool.abi.json -m getParticipantInfo -p "{\"addr\":$Curr_Part_Addr}" --decode-c6 $dpc_addr|grep -i 'withdrawValue' | jq ".locks.\"$Hex_Curr_Round_ID\".withdrawalPeriod" |tr -d '"')
     Lck_Out_DateTime="$(echo $((Lck_Start_Time + Lck_Held_For)) | gawk '{print strftime("%Y-%m-%d %H:%M:%S", $1)}')"
@@ -462,7 +483,7 @@ do
         LockInfo="; Lock: $((Curr_Lck_Stake / 1000000000)) will out: $Lck_Out_DateTime"
     fi
     #--------------------------------------------
-    echo "$(printf '%4d' $(($i + 1))) $Curr_Part_Addr Reward: $RWRD_Info ; Stakes: $POS_Info / $COS_Info / $NOS_Info $LockInfo $Wtdr_Val_Info"
+    echo -e "$(printf '%4d' $(($i + 1))) $Curr_Part_Addr Reward: $RWRD_Info ; Stakes(${REINV_Info}): $POS_Info / $COS_Info / $NOS_Info $LockInfo $Wtdr_Val_Info"
     #--------------------------------------------
 done
 
@@ -486,6 +507,14 @@ do
     Reward=$($CALL_TL test -a ${DSCs_DIR}/DePool.abi.json -m getParticipantInfo -p "{\"addr\":$Curr_Part_Addr}" --decode-c6 $dpc_addr|grep -i 'withdrawValue' | jq ".reward"|tr -d '"')
     RWRD_Info=$(printf "%'8.2f" "$(echo $((Reward)) / 1000000000 | jq -nf /dev/stdin)")
 
+    Reinvest=$($CALL_TL test -a ${DSCs_DIR}/DePool.abi.json -m getParticipantInfo -p "{\"addr\":$Curr_Part_Addr}" --decode-c6 $dpc_addr|grep -i 'withdrawValue' | jq ".reinvest"|tr -d '"')
+    REINV_Info=""
+    if [[ "${Reinvest}" == "false" ]];then
+        REINV_Info="${RedBack}GONE${NormText}"
+    elif [[ "${Reinvest}" == "true" ]];then
+        REINV_Info="Stay"
+    fi
+
     Curr_Lck_Stake=$($CALL_TL test -a ${DSCs_DIR}/DePool.abi.json -m getParticipantInfo -p "{\"addr\":$Curr_Part_Addr}" --decode-c6 $dpc_addr|grep -i 'withdrawValue' | jq ".locks.\"$Hex_Curr_Round_ID\".amount" |tr -d '"')
     
     Wtdr_Val_hex=$($CALL_TL test -a ${DSCs_DIR}/DePool.abi.json -m getParticipantInfo -p "{\"addr\":$Curr_Part_Addr}" --decode-c6 $dpc_addr|grep -i 'withdrawValue' | jq ".withdrawValue"|tr -d '"')
@@ -494,6 +523,10 @@ do
         Wtdr_Val_Info="; Next round withdraw: $(echo "scale=3; $((Wtdr_Val_hex)) / 1000000000" | $CALL_BC)"
     fi
 
+    Curr_Lck_Stake=$(($($CALL_TL test -a ${DSCs_DIR}/DePool.abi.json -m getParticipantInfo -p "{\"addr\":$Curr_Part_Addr}" --decode-c6 $dpc_addr|grep -i 'withdrawValue' | jq ".locks.\"$Hex_Curr_Round_ID\".amount" |tr -d '"')))
+    if [[ $Curr_Lck_Stake -eq 0 ]];then
+        Curr_Lck_Stake=$(($($CALL_TL test -a ${DSCs_DIR}/DePool.abi.json -m getParticipantInfo -p "{\"addr\":$Curr_Part_Addr}" --decode-c6 $dpc_addr|grep -i 'withdrawValue' | jq ".locks.\"$Hex_Curr_Round_ID\".remainingAmount" |tr -d '"')))
+    fi
     Lck_Start_Time=$($CALL_TL test -a ${DSCs_DIR}/DePool.abi.json -m getParticipantInfo -p "{\"addr\":$Curr_Part_Addr}" --decode-c6 $dpc_addr|grep -i 'withdrawValue' | jq ".locks.\"$Hex_Curr_Round_ID\".lastWithdrawalTime" |tr -d '"')
     Lck_Held_For=$($CALL_TL test -a ${DSCs_DIR}/DePool.abi.json -m getParticipantInfo -p "{\"addr\":$Curr_Part_Addr}" --decode-c6 $dpc_addr|grep -i 'withdrawValue' | jq ".locks.\"$Hex_Curr_Round_ID\".withdrawalPeriod" |tr -d '"')
     Lck_Out_DateTime="$(echo $((Lck_Start_Time + Lck_Held_For)) | gawk '{print strftime("%Y-%m-%d %H:%M:%S", $1)}')"
@@ -503,7 +536,7 @@ do
     fi
 
     #--------------------------------------------
-    echo "$(printf '%4d' $(($i + 1))) $Curr_Part_Addr Reward: $RWRD_Info ; Stakes: $POS_Info / $COS_Info / $NOS_Info $LockInfo $Wtdr_Val_Info"
+    echo -e "$(printf '%4d' $(($i + 1))) $Curr_Part_Addr Reward: $RWRD_Info ; Stakes(${REINV_Info}): $POS_Info / $COS_Info / $NOS_Info $LockInfo $Wtdr_Val_Info"
     #--------------------------------------------
 done
 

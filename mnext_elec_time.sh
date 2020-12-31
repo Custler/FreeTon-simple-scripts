@@ -34,6 +34,7 @@ echo
 echo "################################# Set timetable for msig #####################################"
 echo "INFO: $(basename "$0") BEGIN $(date +%s) / $(date)"
 
+DELAY_TIME=0        # Delay time from the start of elections
 TIME_SHIFT=120
 SCRPT_USER=$USER
 
@@ -114,7 +115,7 @@ END_OF_ELECTIONS_TIME=$((election_id - EEND_BEFORE))
 END_OF_ELECTIONS=$(GET_M_H "$END_OF_ELECTIONS_TIME")
 #===================================================
 # for new script it need to run msig script twice
-CRR_ELECTION_TIME=$((CURR_VAL_UNTIL - STRT_BEFORE + TIME_SHIFT))
+CRR_ELECTION_TIME=$((CURR_VAL_UNTIL - STRT_BEFORE + TIME_SHIFT + DELAY_TIME))
 CRR_ELECTION_SECOND_TIME=$(($CRR_ELECTION_TIME + $TIME_SHIFT))
 CRR_ADNL_TIME=$(($CRR_ELECTION_SECOND_TIME + $TIME_SHIFT))
 CRR_BAL_TIME=$(($CRR_ADNL_TIME + $TIME_SHIFT))
@@ -128,7 +129,7 @@ CUR_ELECT_5=$(GET_M_H "$CRR_CHG_TIME")
 
 #===================================================
 # for new script it need to run msig script twice
-NEXT_ELECTION_TIME=$((CURR_VAL_UNTIL + VAL_DUR - STRT_BEFORE + $TIME_SHIFT))
+NEXT_ELECTION_TIME=$((CURR_VAL_UNTIL + VAL_DUR - STRT_BEFORE + $TIME_SHIFT + DELAY_TIME))
 NEXT_ELECTION_SECOND_TIME=$(($NEXT_ELECTION_TIME + $TIME_SHIFT))
 NEXT_ADNL_TIME=$(($NEXT_ELECTION_SECOND_TIME + $TIME_SHIFT))
 NEXT_BAL_TIME=$(($NEXT_ADNL_TIME + $TIME_SHIFT))
@@ -179,17 +180,19 @@ CRONT_JOBS=$(cat <<-_ENDCRN_
 SHELL=/bin/bash
 PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin:/home/$SCRPT_USER/bin
 HOME=/home/$SCRPT_USER
+*/2 * * * *    cd ${SCRIPT_DIR} && ./rise_node_if_down.sh >> /var/ton-work/validator_msig.log
 $NXT_ELECT_1 * * *    cd ${SCRIPT_DIR} && ./lt-validator_msig.sh 1 >> ${TON_LOG_DIR}/validator_msig.log
 $NXT_ELECT_2 * * *    cd ${SCRIPT_DIR} && ./mnext_elec_time.sh >> /var/ton-work/validator_msig.log && ./balance_check.sh >> ${TON_LOG_DIR}/validator_msig.log
 $CUR_ELECT_3 * * *    cd ${SCRIPT_DIR} && ./lt-validator_msig.sh $STAKE_AMNT >> ${TON_LOG_DIR}/validator_msig.log
 $CUR_ELECT_4 * * *    cd ${SCRIPT_DIR} && ./participant_list.sh >> ${TON_LOG_DIR}/validator_msig.log && ./balance_check.sh >> ${TON_LOG_DIR}/validator_msig.log
-$END_OF_ELECTIONS * * *    cd ${SCRIPT_DIR} && ./get_participant_list.sh > $END_OF_ELECTIONS/${election_id}_parts.lst && chmod 444 $END_OF_ELECTIONS/${election_id}_parts.lst
+$END_OF_ELECTIONS * * *    cd ${SCRIPT_DIR} && ./get_participant_list.sh > $END_OF_ELECTIONS/${election_id}_parts.lst && chmod 444 $END_OF_ELECTIONS/${election_id}_parts.lst && ./rotate_nodelog.sh
 _ENDCRN_
 )
 
 else
 
 CRONT_JOBS=$(cat <<-_ENDCRN_
+*/2 * * * *    script --return --quiet --append --command "cd ${SCRIPT_DIR} && ./rise_node_if_down.sh >> /var/ton-work/validator_msig.log
 $NXT_ELECT_1 * * *    script --return --quiet --append --command "cd ${SCRIPT_DIR} && ./lt-validator_msig.sh 1 >> ${TON_LOG_DIR}/validator_msig.log"
 $NXT_ELECT_2 * * *    script --return --quiet --append --command "cd ${SCRIPT_DIR} && ./mnext_elec_time.sh >> ${TON_LOG_DIR}/validator_msig.log && ./balance_check.sh >> ${TON_LOG_DIR}/validator_msig.log"
 $CUR_ELECT_3 * * *    script --return --quiet --append --command "cd ${SCRIPT_DIR} && ./lt-validator_msig.sh $STAKE_AMNT >> ${TON_LOG_DIR}/validator_msig.log"

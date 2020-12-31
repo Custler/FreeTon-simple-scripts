@@ -1,6 +1,6 @@
 #!/bin/bash 
 
-# (C) Sergey Tyurin  2020-09-05 15:00:00
+# (C) Sergey Tyurin  2020-11-11 15:00:00
 
 # Disclaimer
 ##################################################################################################################
@@ -31,17 +31,17 @@ if [ "${INSTALL_DEPENDENCIES}" = "yes" ]; then
     sudo dnf -y update && sudo dnf upgrade && sudo dnf clean all
     sudo dnf -y group list ids 
     sudo dnf -y group install "Development Tools"
+    sudo dnf -y config-manager --set-enabled powertools
     sudo dnf -y install cargo
     sudo dnf -y install curl jq wget bc vim logrotate
-    sudo dnf -y --enablerepo=PowerTools install gperf
-    sudo dnf -y install snappy 
-    sudo dnf -y --enablerepo=PowerTools install snappy-devel
+    sudo dnf -y install gperf
+    sudo dnf -y install snappy snappy-devel
     sudo dnf -y install zlib zlib-devel
     sudo dnf -y install bzip2 bzip2-devel
     sudo dnf -y install lz4-devel
-    sudo dnf -y --enablerepo=PowerTools install libmicrohttpd-devel
+    sudo dnf -y install libmicrohttpd-devel
     sudo dnf -y install readline-devel openssl-devel zlib-devel
-    sudo dnf -y --enablerepo=PowerTools install ninja-build
+    sudo dnf -y install ninja-build
 #------------------------------------------------------
     echo "INFO: Install gflags"
     if [[ ! -d "/usr/local/include/gflags" ]];then

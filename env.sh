@@ -2,10 +2,12 @@
 
 export NETWORK_TYPE="fld.ton.dev"
 export MAIN_NET_ID="58FFCA1A178DAFF7"
-export DEV_NET_ID="3540FA79BD97390D"
-export FLD_NET_ID="101FED41A989FE77"
+export DEV_NET_ID="845019E5F1617076"
+# Prev zerostate: "3540FA79BD97390D" - dead 25-12-2020
+export FLD_NET_ID="C3D81D4021421866"
+# Prev zerostate: "101FED41A989FE77" - dead 21-12-2020
 
-export MASTER_NODE="fld0"
+export MASTER_NODE="fld01"
 export NODE_IP_ADDR="$(curl -sS ipv4bot.whatismyipaddress.com)"
 export ADNL_PORT="30310"
 export NODE_ADDRESS="${NODE_IP_ADDR}:${ADNL_PORT}"
@@ -40,7 +42,7 @@ export VAL_ENGINE_CONSOLE_PORT="3030"
 export ENGINE_ADDITIONAL_PARAMS=""
 
 export SafeSCs_DIR=$NET_TON_DEV_SRC_TOP_DIR/ton-labs-contracts/solidity/safemultisig
-export SetSCs_DIR=$NET_TON_DEV_SRC_TOP_DIR/ton-labs-contracts/solidity/safemultisig
+export SetSCs_DIR=$NET_TON_DEV_SRC_TOP_DIR/ton-labs-contracts/solidity/setcodemultisig
 export DSCs_DIR=$NET_TON_DEV_SRC_TOP_DIR/ton-labs-contracts/solidity/depool
 export CRYPTO_DIR=$TON_SRC_DIR/crypto
 export FSCs_DIR=$CRYPTO_DIR/smartcont

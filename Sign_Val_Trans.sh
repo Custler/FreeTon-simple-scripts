@@ -105,8 +105,7 @@ function Get_SC_current_state() {
     trap - EXIT
     local result=`echo $LC_OUTPUT | grep "written StateInit of account"`
     if [[ -z  $result ]];then
-        echo "###-ERROR(line $LINENO):
- Cannot get account state. Can't continue. Sorry."
+        echo "###-ERROR(line $LINENO): Cannot get account state. Can't continue. Sorry."
         exit 1
     fi
     echo "$LC_OUTPUT"
@@ -130,9 +129,9 @@ fi
 
 #=================================================
 # Call defines
-CALL_LC="${TON_BUILD_DIR}/lite-client/lite-client -p ${KEYS_DIR}/liteserver.pub -a 127.0.0.1:3031 -t 5"
-CALL_VC="${TON_BUILD_DIR}/validator-engine-console/validator-engine-console -k ${KEYS_DIR}/client -p ${KEYS_DIR}/server.pub -a 127.0.0.1:3030 -t 5"
-CALL_FIFT="${TON_BUILD_DIR}/crypto/fift -I ${TON_SRC_DIR}/crypto/fift/lib:${TON_SRC_DIR}/crypto/smartcont"
+# CALL_LC="${TON_BUILD_DIR}/lite-client/lite-client -p ${KEYS_DIR}/liteserver.pub -a 127.0.0.1:3031 -t 5"
+# CALL_VC="${TON_BUILD_DIR}/validator-engine-console/validator-engine-console -k ${KEYS_DIR}/client -p ${KEYS_DIR}/server.pub -a 127.0.0.1:3030 -t 5"
+# CALL_FIFT="${TON_BUILD_DIR}/crypto/fift -I ${TON_SRC_DIR}/crypto/fift/lib:${TON_SRC_DIR}/crypto/smartcont"
 
 #=================================================
 # MSIG_ADDR=`cat "${KEYS_DIR}/${VALIDATOR_NAME}.addr"`

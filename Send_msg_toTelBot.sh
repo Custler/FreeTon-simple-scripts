@@ -1,7 +1,11 @@
 #!/bin/bash
 
-telegram_bot_token=
-telegram_chat_id=""
+# telegram_bot_token=
+# telegram_chat_id=""
+
+telegram_bot_token=$(cat TlgChat.json|jq '.telegram_bot_token'|tr -d '"')
+telegram_chat_id=$(cat TlgChat.json|jq '.telegram_chat_id'|tr -d '"')
+
 
 Title="$1"
 Message="$2"
